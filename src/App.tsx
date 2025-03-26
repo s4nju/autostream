@@ -4,24 +4,20 @@ import "./App.css";
 interface TrackingEvent {
   eventType: string;
   element: string;
-  value: string;
+  value: string | null;
   url: string;
-  timestamp: string;
+  timestamp: number;
 }
 
 function App() {
   const [trackingEvents, setTrackingEvents] = useState<TrackingEvent[]>([]);
+  const [isTracking, setIsTracking] = useState(true);
 
   useEffect(() => {
     const updateEvents = () => {
-      const eventsStr = localStorage.getItem("user_tracking_events");
-      if (eventsStr) {
-        try {
-          const events = JSON.parse(eventsStr);
-          setTrackingEvents(events);
-        } catch (error) {
-          console.error("Error parsing tracking events:", error);
-        }
+      const events = localStorage.getItem("user_tracking_events");
+      if (events) {
+        setTrackingEvents(JSON.parse(events));
       }
     };
 
@@ -29,15 +25,50 @@ function App() {
     updateEvents();
 
     // Set up polling interval
-    const intervalId = setInterval(updateEvents, 2000);
+    const intervalId = setInterval(updateEvents, 200);
 
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
   }, []);
 
+  const handleStartTracking = () => {
+    window.UserTracker.startTracking();
+    setIsTracking(true);
+  };
+
+  const handleStopTracking = () => {
+    window.UserTracker.stopTracking();
+    setIsTracking(false);
+  };
+
+  const handleClearEvents = () => {
+    window.UserTracker.clearEvents();
+  };
+
   return (
     <div className="tracking-events">
-      <h2>User Tracking Events</h2>
+      <div className="header-container">
+        <h2>User Tracking Events</h2>
+        <div className="tracking-controls">
+          <button
+            onClick={handleStartTracking}
+            disabled={isTracking}
+            className="control-button start"
+          >
+            Start Tracking
+          </button>
+          <button
+            onClick={handleStopTracking}
+            disabled={!isTracking}
+            className="control-button stop"
+          >
+            Stop Tracking
+          </button>
+          <button onClick={handleClearEvents} className="control-button clear">
+            Clear Events
+          </button>
+        </div>
+      </div>
       {trackingEvents.length === 0 ? (
         <p>No tracking events found</p>
       ) : (
@@ -57,12 +88,16 @@ function App() {
                 </span>
               </div>
               <div className="event-details">
-                <p>
-                  <strong>Element:</strong> {event.element}
-                </p>
-                <p>
-                  <strong>Value:</strong> {event.value}
-                </p>
+                {event.eventType !== "scroll" && (
+                  <p>
+                    <strong>Element:</strong> {event.element}
+                  </p>
+                )}
+                {event.eventType === "input" && (
+                  <p>
+                    <strong>Value:</strong> {event.value}
+                  </p>
+                )}
                 <p>
                   <strong>URL:</strong> {event.url}
                 </p>
