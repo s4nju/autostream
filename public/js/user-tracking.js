@@ -3,6 +3,7 @@ export class UserTracker {
   events = [];
   isTracking = false;
   STORAGE_KEY = "user_tracking_events";
+  debounceTimeout = null;
 
   constructor() {
     document.addEventListener("click", (event) =>
@@ -15,7 +16,7 @@ export class UserTracker {
       this.handleEvent(event, "keydown")
     );
     document.addEventListener("scroll", (event) =>
-      this.handleEvent(event, "scroll")
+      this.handleDebouncedEvent(event, "scroll")
     );
 
     // Load existing events from localStorage
@@ -65,6 +66,16 @@ export class UserTracker {
     this.saveEvents();
   }
 
+  handleDebouncedEvent(event, eventType) {
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+    }
+
+    this.debounceTimeout = setTimeout(() => {
+      this.handleEvent(event, eventType);
+    }, 100); // 250ms debounce delay
+  }
+
   startTracking() {
     this.isTracking = true;
   }
@@ -82,8 +93,12 @@ export class UserTracker {
       this.handleEvent(event, "keydown")
     );
     document.removeEventListener("scroll", () =>
-      this.handleEvent(event, "scroll")
+      this.handleDebouncedEvent(event, "scroll")
     );
+
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+    }
 
     this.isTracking = false;
     // console.log("User tracking stopped");

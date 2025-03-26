@@ -8,18 +8,33 @@ A lightweight JavaScript library for tracking user interactions on websites. Thi
   - Clicks
   - Input changes
   - Key presses
-  - Scroll events
+  - Scroll events (debounced)
 - Persistent storage using localStorage
 - Simple API for controlling tracking
 - Detailed event information including timestamps and element details
+- React demo application included
 
 ## Installation
 
-1. Clone this repository or download the `user-tracking.js` file
-2. Include the script in your HTML file:
+1. Clone this repository
+2. Install dependencies:
 
-```html
-<script src="path/to/user-tracking.js"></script>
+```bash
+npm install
+```
+
+## Development
+
+To run the development server:
+
+```bash
+npm run dev
+```
+
+To build for production:
+
+```bash
+npm run build
 ```
 
 ## Usage
@@ -27,27 +42,25 @@ A lightweight JavaScript library for tracking user interactions on websites. Thi
 ### Basic Implementation
 
 ```html
-<script src="user-tracking.js"></script>
-<script>
-  // Start tracking user interactions
-  UserTracker.getInstance().startTracking();
-</script>
+<script type="module" src="/js/user-tracking.js"></script>
 ```
+
+The library automatically initializes and starts tracking when loaded. You can access the tracker through the global `window.UserTracker` object.
 
 ### API Methods
 
 ```javascript
 // Start tracking
-UserTracker.getInstance().startTracking();
+window.UserTracker.startTracking();
 
 // Stop tracking
-UserTracker.getInstance().stopTracking();
+window.UserTracker.stopTracking();
 
 // Get all recorded events
-const events = UserTracker.getInstance().getEvents();
+const events = window.UserTracker.getEvents();
 
 // Clear all recorded events
-UserTracker.getInstance().clearEvents();
+window.UserTracker.clearEvents();
 ```
 
 ### Event Data Structure
@@ -57,34 +70,9 @@ Each recorded event contains the following information:
 ```javascript
 {
     eventType: string,    // Type of event (click, input, keydown, scroll)
-    element: string,      // CSS selector of the target element
-    value: string,        // Value for input events (optional)
+    element: string,      // CSS selector of the target element (includes tag name, id, and classes)
+    value: string|null,   // Value for input events (null for non-input events)
     url: string,         // URL where the event occurred
     timestamp: number    // Unix timestamp of the event
 }
 ```
-
-## Demo
-
-A demo page is included in the repository. To view it:
-
-1. Clone the repository
-2. Open `public/index.html` in a web browser
-3. Interact with the demo elements to see the tracking in action
-4. Use the control buttons to start/stop tracking and view recorded events
-
-## Browser Support
-
-The library is compatible with all modern browsers that support:
-
-- ES6+
-- localStorage
-- Event delegation
-
-## License
-
-MIT License - feel free to use this library in your projects.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
